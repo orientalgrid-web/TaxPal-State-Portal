@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nigeria State Tax Portal - Unified System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #008753; /* Nigeria green */
+            --secondary: #FFFFFF;
+            --accent: #E6BE8A; /* Gold accent */
+            --danger: #E05252;
+            --success: #28a745;
+            --warning: #ffc107;
+            --dark: #333333;
+            --light: #f8f9fa;
+            --border: #e0e0e0;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --radius: 10px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: #f5f7fa; color: var(--dark); line-height: 1.6; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 20px; }
+
+        header { background: linear-gradient(135deg, var(--primary) 0%, #006442 100%); color: white; padding: 1.5rem 0; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 1000; }
+        .header-content { display: flex; justify-content: space-between; align-items: center; }
+        .logo { display: flex; align-items: center; gap: 15px; }
+        .logo-icon { font-size: 2.5rem; color: var(--accent); }
+        
+        nav { display: flex; gap: 25px; align-items: center; }
+        .nav-link { color: white; text-decoration: none; font-weight: 500; padding: 8px 15px; border-radius: 5px; transition: 0.3s; }
+        .nav-link.active { background: var(--accent); color: var(--dark); }
+
+        .hero { padding: 4rem 0; background: linear-gradient(rgba(0, 135, 83, 0.9), rgba(0, 100, 66, 0.9)), url('https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1600&q=80'); background-size: cover; color: white; text-align: center; }
+        
+        .filter-bar { background: white; padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); margin: -30px auto 30px; display: flex; flex-wrap: wrap; gap: 15px; position: relative; z-index: 10; }
+        .filter-group { flex: 1; min-width: 200px; }
+        .filter-label { font-weight: 600; color: var(--primary); margin-bottom: 5px; display: block; }
+        .filter-select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 5px; }
+
+        .states-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; padding: 2rem 0; }
+        .state-card { background: white; border-radius: var(--radius); padding: 25px; box-shadow: var(--shadow); transition: 0.3s; border: 2px solid transparent; }
+        .state-card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        
+        .status-connected { color: var(--success); font-weight: bold; }
+        .status-pending { color: var(--warning); font-weight: bold; }
+        .status-offline { color: var(--danger); font-weight: bold; }
+
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+        .btn-primary { background: var(--primary); color: white; width: 100%; justify-content: center; }
+        
+        #dashboard-section { display: none; margin-top: 40px; background: white; padding: 30px; border-radius: var(--radius); box-shadow: var(--shadow); }
+        .chart-container { margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <i class="fas fa-landmark logo-icon"></i>
+                <div class="logo-text">
+                    <h1>TaxPal Nigeria</h1>
+                    <p>Unified State Integration</p>
+                </div>
+            </div>
+            <nav>
+                <a href="#" class="nav-link active">Dashboard</a>
+                <a href="mailto:orientalgrid@gmail.com" class="nav-link">Contact Support</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h2>Unified State Tax Integration System</h2>
+            <p>Monitoring revenue and API health for the Orient Neo 7 rollout across Nigeria.</p>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label class="filter-label">Search State</label>
+                <input type="text" id="searchInput" class="filter-select" placeholder="Enter state name...">
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Region</label>
+                <select id="regionFilter" class="filter-select">
+                    <option value="all">All Regions</option>
+                    <option value="south-west">South West</option>
+                    <option value="north-central">North Central</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="states-container" id="statesGrid"></div>
+
+        <div id="dashboard-section">
+            <h2 id="selectedStateTitle" style="color: var(--primary);">State Revenue Analytics</h2>
+            <div class="chart-container">
+                <canvas id="revenueChart"></canvas>
+            </div>
+            <button class="btn btn-primary" onclick="document.getElementById('dashboard-section').style.display='none'">Close Analytics</button>
+        </div>
+    </div>
+
+    <script>
+        const statesData = [
+            { id: 1, name: "Lagos", region: "south-west", status: "connected", revenue: [45, 52, 48, 61] },
+            { id: 2, name: "Rivers", region: "south-south", status: "connected", revenue: [28, 30, 35, 33] },
+            { id: 3, name: "FCT Abuja", region: "north-central", status: "connected", revenue: [32, 31, 38, 40] },
+            { id: 4, name: "Kano", region: "north-west", status: "pending", revenue: [12, 15, 14, 18] },
+            { id: 5, name: "Enugu", region: "south-east", status: "offline", revenue: [0, 0, 0, 0] }
+        ];
+
+        const grid = document.getElementById('statesGrid');
+        let revenueChart;
+
+        function renderGrid(data) {
+            grid.innerHTML = '';
+            data.forEach(state => {
+                grid.innerHTML += `
+                    <div class="state-card">
+                        <h3>${state.name}</h3>
+                        <p>Status: <span class="status-${state.status}">${state.status.toUpperCase()}</span></p>
+                        <p>Region: ${state.region}</p>
+                        <br>
+                        <button class="btn btn-primary" onclick="viewState(${state.id})">View Analytics</button>
+                    </div>
+                `;
+            });
+        }
+
+        function viewState(id) {
+            const state = statesData.find(s => s.id === id);
+            document.getElementById('dashboard-section').style.display = 'block';
+            document.getElementById('selectedStateTitle').innerText = `${state.name} Revenue Performance`;
+            document.getElementById('dashboard-section').scrollIntoView({ behavior: 'smooth' });
+
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            if (revenueChart) revenueChart.destroy();
+
+            revenueChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Oct', 'Nov', 'Dec', 'Jan'],
+                    datasets: [{
+                        label: 'Revenue (Billions ₦)',
+                        data: state.revenue,
+                        backgroundColor: '#008753'
+                    }]
+                }
+            });
+        }
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const filtered = statesData.filter(s => s.name.toLowerCase().includes(e.target.value.toLowerCase()));
+            renderGrid(filtered);
+        });
+
+        renderGrid(statesData);
+    </script>
+</body>
+</html>
