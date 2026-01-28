@@ -31,4 +31,4 @@ For partnership inquiries or technical support regarding the **Oriental Grid** r
 
 * **Primary WhatsApp:** +234 908 888 57570
 * **Secondary Contact:** +234 908 875 7570
-* **Email:** orientalgrid@gmail.com
+* **Email:** orientalgrid@gmail.com.
