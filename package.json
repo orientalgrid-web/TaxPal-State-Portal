@@ -1,0 +1,10 @@
+{
+  "name": "taxpal-portal",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "npx serve -l 3000"
+  },
+  "dependencies": {
+    "serve": "^14.0.0"
+  }
+}
